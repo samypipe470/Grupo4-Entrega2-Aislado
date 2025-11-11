@@ -13,8 +13,9 @@ public interface PrestamoRepository extends JpaRepository<Prestamo, Integer> {
     @Query("SELECT p FROM Prestamo p WHERE p.id_usuario = :usuarioId AND (p.id_estado_prestamo = 2 OR p.id_estado_prestamo = 4)")
     List<Prestamo> findActivosYVencidosByUsuarioId(@Param("usuarioId") Integer usuarioId);
 
-    // Listar por estado específico
-    List<Prestamo> findByIdEstadoPrestamo(Integer id_estado_prestamo);
+    // Listar por estado específico (usar @Query por nombre de campo con guiones bajos)
+    @Query("SELECT p FROM Prestamo p WHERE p.id_estado_prestamo = :estado")
+    List<Prestamo> findByEstado(@Param("estado") Integer estado);
 
     // Préstamos vencidos: activos cuya fecha esperada ya pasó
     @Query("SELECT p FROM Prestamo p WHERE p.id_estado_prestamo = 2 AND p.fecha_devolucion_esperada < CURRENT_TIMESTAMP")

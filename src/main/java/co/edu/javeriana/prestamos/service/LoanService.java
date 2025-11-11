@@ -149,7 +149,7 @@ public class LoanService {
         if (estado == null) {
             return prestamoRepository.findAll();
         }
-        return prestamoRepository.findByIdEstadoPrestamo(estado);
+        return prestamoRepository.findByEstado(estado);
     }
 
     // -------- NUEVO: Listar préstamos vencidos --------

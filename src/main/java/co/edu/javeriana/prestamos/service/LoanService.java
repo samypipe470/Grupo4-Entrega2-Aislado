@@ -2,6 +2,7 @@ package co.edu.javeriana.prestamos.service;
 
 import co.edu.javeriana.prestamos.model.Prestamo;
 import co.edu.javeriana.prestamos.repository.PrestamoRepository; // <-- REAL
+import co.edu.javeriana.prestamos.repository.LibroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Importante para la BD
@@ -22,10 +23,15 @@ public class LoanService {
 
     // Cliente hacia el Catálogo (G3) en lugar de acceder a la BD de libros
     private final CatalogClient catalogClient;
+    private final LibroRepository libroRepository;
+    private final MappingService mappingService;
     private final PrestamoRepository prestamoRepository;
 
-    public LoanService(CatalogClient catalogClient, PrestamoRepository prestamoRepository) {
+    public LoanService(CatalogClient catalogClient, LibroRepository libroRepository,
+                       MappingService mappingService, PrestamoRepository prestamoRepository) {
         this.catalogClient = catalogClient;
+        this.libroRepository = libroRepository;
+        this.mappingService = mappingService;
         this.prestamoRepository = prestamoRepository;
     }
 
@@ -38,6 +44,15 @@ public class LoanService {
         boolean reservado = catalogClient.reservarUno(String.valueOf(libroId));
         if (!reservado) {
             throw new Exception("Error 400: Libro no disponible o no encontrado en Catálogo");
+        }
+
+        // 1.1 Mapear id de Catálogo (G3) al id REAL de BD (G1), si es necesario
+        Integer dbLibroId = mappingService.mapToDbId(libroId);
+        if (dbLibroId == null) dbLibroId = libroId; // por defecto, usar el mismo
+
+        // 1.2 Verificar que exista en la tabla 'libro' de la BD real
+        if (!libroRepository.existsById(dbLibroId)) {
+            throw new Exception("Error 400: El id_libro=" + dbLibroId + " no existe en la BD. Configure el mapeo BOOK_ID_MAP en G4.");
         }
 
         // 2. Validar que el usuario pueda pedir prestado (con la consulta real)
@@ -60,7 +75,7 @@ public class LoanService {
 
         // 5. ¡Todo en orden! Crear el préstamo
         // Usamos null para que JPA genere el ID (AUTO_INCREMENT)
-        Prestamo nuevoPrestamo = new Prestamo(null, usuarioId, libroId, ESTADO_SOLICITADO);
+        Prestamo nuevoPrestamo = new Prestamo(null, usuarioId, dbLibroId, ESTADO_SOLICITADO);
         
         // 6. Guardar el préstamo en la BD REAL
         return prestamoRepository.save(nuevoPrestamo);

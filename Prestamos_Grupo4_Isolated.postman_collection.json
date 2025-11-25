@@ -1,0 +1,77 @@
+{
+  "info": {
+    "name": "G4 - Prestamos y Reservas (Isolated)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "g4-prestamos-isolated"
+  },
+  "item": [
+    {
+      "name": "Loans - Solicitar prestamo",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-User-Id", "value": "7" },
+          { "key": "X-User-Roles", "value": "ESTUDIANTE" }
+        ],
+        "url": { "raw": "{{G4_BASE}}/api/loans", "host": ["{{G4_BASE}}"], "path": ["api","loans"] },
+        "body": { "mode": "raw", "raw": "{\n  \"libro_id\": 123\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "Loans - Mis prestamos",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-User-Id", "value": "7" },
+          { "key": "X-User-Roles", "value": "ESTUDIANTE" }
+        ],
+        "url": { "raw": "{{G4_BASE}}/api/loans/my-loans", "host": ["{{G4_BASE}}"], "path": ["api","loans","my-loans"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Loans - Devolver prestamo (admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "X-User-Id", "value": "1" },
+          { "key": "X-User-Roles", "value": "ADMIN" }
+        ],
+        "url": { "raw": "{{G4_BASE}}/api/loans/1/return", "host": ["{{G4_BASE}}"], "path": ["api","loans","1","return"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Reservations - Crear",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-User-Id", "value": "7" },
+          { "key": "X-User-Roles", "value": "ESTUDIANTE" }
+        ],
+        "url": { "raw": "{{G4_BASE}}/api/reservations", "host": ["{{G4_BASE}}"], "path": ["api","reservations"] },
+        "body": { "mode": "raw", "raw": "{\n  \"libro_id\": 123\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "Reservations - Mias",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-User-Id", "value": "7" },
+          { "key": "X-User-Roles", "value": "ESTUDIANTE" }
+        ],
+        "url": { "raw": "{{G4_BASE}}/api/reservations/my-reservations", "host": ["{{G4_BASE}}"], "path": ["api","reservations","my-reservations"] }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    { "key": "G4_BASE", "value": "http://localhost:8081" }
+  ]
+}
+

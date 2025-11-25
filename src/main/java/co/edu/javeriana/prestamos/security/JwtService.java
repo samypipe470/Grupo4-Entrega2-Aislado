@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import java.nio.charset.StandardCharsets;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -60,6 +61,31 @@ public class JwtService {
         return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).getBody();
     }
 
-    private Key getSignInKey() { byte[] keyBytes = Decoders.BASE64.decode(secretKey); return Keys.hmacShaKeyFor(keyBytes); }
-}
+    private Key getSignInKey() {
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(secretKey);
+        } catch (IllegalArgumentException ex) {
+            try {
+                keyBytes = decodeHex(secretKey);
+            } catch (IllegalArgumentException ex2) {
+                keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+            }
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
+    private static byte[] decodeHex(String s) {
+        String h = s.replaceAll("\\s", "");
+        if ((h.length() & 1) != 0) throw new IllegalArgumentException("Invalid hex length");
+        int len = h.length();
+        byte[] out = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            int hi = Character.digit(h.charAt(i), 16);
+            int lo = Character.digit(h.charAt(i + 1), 16);
+            if (hi == -1 || lo == -1) throw new IllegalArgumentException("Invalid hex char");
+            out[i / 2] = (byte) ((hi << 4) + lo);
+        }
+        return out;
+    }
+}

@@ -1,10 +1,9 @@
 package co.edu.javeriana.prestamos.controller;
 
-public class LoanRequest {
-    // Define el JSON: { "libro_id": 1 }
-    private Integer libro_id; // Nombre exacto del contrato
+public class ReservationRequest {
+    private Integer libro_id; // id de G3
 
-    public LoanRequest() {
+    public ReservationRequest() {
     }
 
     public Integer getLibro_id() {

@@ -1,7 +1,7 @@
 package co.edu.javeriana.prestamos.config;
 
 import co.edu.javeriana.prestamos.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import co.edu.javeriana.prestamos.security.MockUserFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -27,11 +27,19 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+    private final MockUserFilter mockUserFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
+                          UserDetailsService userDetailsService,
+                          MockUserFilter mockUserFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.userDetailsService = userDetailsService;
+        this.mockUserFilter = mockUserFilter;
+    }
 
     @Bean
     @Order(1)
@@ -42,7 +50,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // JWT antes de UsernamePasswordAuthenticationFilter (pivot conocido)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            // MockUser despues de UsernamePasswordAuthenticationFilter (pivot conocido),
+            // quedando posteriormente a JWT. Si JWT setea autenticacion, MockUser no sobreescribe.
+            .addFilterAfter(mockUserFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
 
@@ -75,4 +87,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
